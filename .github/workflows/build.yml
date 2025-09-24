@@ -3,7 +3,7 @@ name: Build & deploy
 on:
   workflow_dispatch:
   workflow_run:
-    workflows: ['Check']
+    workflows: ["Check"]
     types:
       - completed
 
@@ -220,11 +220,15 @@ jobs:
       - name: List downloaded files
         run: find artifacts -type f
 
+      - name: Get short SHA
+        id: sha
+        run: echo "short_sha=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_OUTPUT
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: build-${{ github.run_id }}
-          name: Build from commit ${{ substr(github.sha, 0, 7) }}
+          name: Build from commit ${{ steps.sha.outputs.short_sha }}
           body: "Automated build from workflow run #${{ github.run_id }}."
           draft: true
           files: artifacts/**/*
